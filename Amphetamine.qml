@@ -12,6 +12,7 @@ PluginComponent {
     property bool hasMediaDevices: false
     property bool sleepInhibited: false
     property string mode: "auto" // "auto" or "manual"
+    property bool isChangingState: false // Track if we're currently changing state ourselves
     
     onSleepInhibitedChanged: {
         console.log("sleepInhibited changed to:", sleepInhibited)
@@ -227,17 +228,11 @@ PluginComponent {
         onExited: (exitCode) => {
             if (exitCode === 0) {
                 console.log("Sleep inhibition successfully enabled")
-                // Verify state matches
-                if (root.hasMediaDevices && !root.sleepInhibited) {
-                    root.sleepInhibited = true
-                }
+                root.sleepInhibited = true
             } else {
                 console.error("Failed to enable sleep inhibition, exit code:", exitCode)
-                // Revert state if command failed
-                if (!root.hasMediaDevices) {
-                    root.sleepInhibited = false
-                }
             }
+            root.isChangingState = false
         }
     }
 
@@ -263,17 +258,11 @@ PluginComponent {
         onExited: (exitCode) => {
             if (exitCode === 0) {
                 console.log("Sleep inhibition successfully disabled")
-                // Verify state matches
-                if (!root.hasMediaDevices && root.sleepInhibited) {
-                    root.sleepInhibited = false
-                }
+                root.sleepInhibited = false
             } else {
                 console.error("Failed to disable sleep inhibition, exit code:", exitCode)
-                // Revert state if command failed
-                if (root.hasMediaDevices) {
-                    root.sleepInhibited = true
-                }
             }
+            root.isChangingState = false
         }
     }
 
@@ -290,6 +279,7 @@ PluginComponent {
         if (root.hasMediaDevices && !root.sleepInhibited) {
             // Enable sleep inhibition
             console.log("Enabling sleep inhibition (media device detected)")
+            root.isChangingState = true
             // Update icon immediately
             root.sleepInhibited = true
             // Stop process if already running
@@ -303,6 +293,7 @@ PluginComponent {
         } else if (!root.hasMediaDevices && root.sleepInhibited) {
             // Disable sleep inhibition
             console.log("Disabling sleep inhibition (no media devices)")
+            root.isChangingState = true
             // Update icon immediately
             root.sleepInhibited = false
             // Stop process if already running
@@ -329,6 +320,7 @@ PluginComponent {
     
     function enableSleepInhibition() {
         console.log("Manually enabling sleep inhibition")
+        root.isChangingState = true
         root.sleepInhibited = true
         if (inhibitEnableProcess.running) {
             inhibitEnableProcess.running = false
@@ -340,6 +332,7 @@ PluginComponent {
     
     function disableSleepInhibition() {
         console.log("Manually disabling sleep inhibition")
+        root.isChangingState = true
         root.sleepInhibited = false
         if (inhibitDisableProcess.running) {
             inhibitDisableProcess.running = false

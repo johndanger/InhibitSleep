@@ -1,10 +1,11 @@
 {
   "id": "dev.johndanger.amphetamine",
   "name": "Amphetamine",
-  "description": "Amphetamine is a plugin that can automatically inhibit sleep when a media player is detected, or manually toggle sleep inhibition",
+  "description": "Amphetamine is a plugin for automatic or manual sleep inhibition",
   "version": "1.0.0",
   "author": "johndanger",
   "type": "widget",
+  "icon": "coffee",
   "component": "./Amphetamine.qml",
   "permissions": []
 }
